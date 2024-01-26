@@ -5,8 +5,9 @@ import textwrap
 from openai import OpenAI
 import IPython
 from IPython.core.interactiveshell import InteractiveShell
-from utils.json_utils import parse_partial_json
-from utils.ipython_utils import richoutput_to_image
+from auto_analytics.utils.json_utils import parse_partial_json
+from auto_analytics.utils.ipython_utils import richoutput_to_image
+from auto_analytics.utils.format_utils import wrap_breakline
 
 client = OpenAI(
   api_key=os.environ['OPENAI_API_KEY'],
@@ -105,8 +106,8 @@ available_functions = {
                 }  
 
 MAX_ROUND = 4
-model_name = 'gpt-3.5-turbo-1106' # "gpt-4-turbo-preview"
-question = "We have already loaded a dataframe `df` in the kernel. Do not reload this. Each row denotes one model and its performance. find the best performing 10 models and summarize their similarities in time window"
+# model_name = 'gpt-3.5-turbo-1106' # "gpt-4-turbo-preview"
+# question = "We have already loaded a dataframe `df` in the kernel. Do not reload this. Each row denotes one model and its performance. find the best performing 10 models and summarize their similarities in time window"
 def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106', 
                    available_functions=available_functions, 
                    codeexec_tools=codeexec_tools, MAX_ROUND=4):
@@ -126,7 +127,8 @@ def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106',
         response_message = response.choices[0].message
         messages.append(response_message)  # extend conversation with assistant's reply
         tool_calls = response_message.tool_calls
-        print(textwrap.fill(response_message.content, width=80))
+        if response_message.content:
+            print(wrap_breakline(response_message.content, width=80))
         # Step 2: check if the model wanted to call a function
         if tool_calls:
             # iterate over all the function calls
@@ -140,7 +142,7 @@ def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106',
                 # Step 3: call the function
                 if function_name == "python_code_exec":
                     out, captured, disp_images = function_to_call(*list(function_args.values()))
-                    print("Python Code executed:\n", function_args['code'])
+                    print("Python Code executed:\n```python", function_args['code'], "```", sep="\n")
                     if not out.success:
                         # if not success, return the error message as function response. 
                         print("Execution error:",  out.error_in_exec.__class__.__name__, out.error_in_exec)
@@ -187,7 +189,7 @@ def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106',
             )  
             # get a new response from the model where it can see the function response
             response_message_w_func = second_response.choices[0].message
-            print(textwrap.fill(response_message_w_func.content, width=80))
+            print(wrap_breakline(response_message_w_func.content, width=80))
             messages.append(response_message_w_func)
         else:
             print("[No tool use. Finishing conversation.]")
