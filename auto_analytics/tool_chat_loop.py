@@ -16,6 +16,7 @@ client = OpenAI(
 system_message = """You are an intelligent assistent with access to a running ipython kernel. 
 You can use `python_code_exec` to execute python code to solve computational problems and return the output. 
 You can also use `inspect_variable` to inspect the state of the kernel by getting the value of a variable. 
+You should use `seek_human_input` when analysis finishes. When you stuck, use this function to ask human for clarification, instruction.
 These functions execute code in local terminal with no cost, you can use them as many times as you want.
 When facing complex problems, you can divide them into smaller problems and run code to solve smaller ones, check the returned results and then solve the more complex one.
 """
@@ -49,7 +50,7 @@ codeexec_functions = [
     },
     {
         'name': 'seek_human_input',
-        'description': 'When analysis finish, stuck or is exhausted, ask human for clarification, instruction for further progress.',
+        'description': 'When analysis finishes, stuck or is exhausted, ask human for clarification, instruction for further progress.',
         'parameters': {
             'type': 'object',
             'properties': {
@@ -116,7 +117,8 @@ def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106',
             {'role': 'system', 'content': system_message}, 
             {'role': 'user', 'content': question}
         ]
-    LOOP_END = False
+    # this flag allows us to break out of the loop when human input is needed.
+    LOOP_END = False 
     for iteration in range(MAX_ROUND):
         response = client.chat.completions.create(
             model = model_name, 
@@ -191,6 +193,98 @@ def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106',
             response_message_w_func = second_response.choices[0].message
             print(wrap_breakline(response_message_w_func.content, width=80))
             messages.append(response_message_w_func)
+        else:
+            print("[No tool use. Finishing conversation.]")
+            break
+    return messages
+
+
+def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106', 
+                   available_functions=available_functions, 
+                   codeexec_tools=codeexec_tools, MAX_ROUND=4):
+    # Step 1: send the conversation and available functions to the model
+    messages = [
+            {'role': 'system', 'content': system_message}, 
+            {'role': 'user', 'content': question}
+        ]
+    # this flag allows us to break out of the loop when human input is needed.
+    LOOP_END = False 
+    for iteration in range(MAX_ROUND):
+        response = client.chat.completions.create(
+            model = model_name, 
+            messages = messages,
+            tools = codeexec_tools,
+            tool_choice = 'auto',  # auto is default, but we'll be explicit
+        )
+        response_message = response.choices[0].message
+        # extract token count
+        token_count = response_message.token_count
+        messages.append(response_message)  # extend conversation with assistant's reply
+        tool_calls = response_message.tool_calls
+        if response_message.content:
+            print(wrap_breakline(response_message.content, width=80))
+        # Step 2: check if the model wanted to call a function
+        if tool_calls:
+            # iterate over all the function calls
+            for tool_call in tool_calls:
+                # Parse the function call
+                function_name = tool_call.function.name
+                function_to_call = available_functions[function_name]
+                # Note: the JSON response may not always be valid; be sure to handle errors
+                # function_args = json.loads(tool_call.function.arguments)
+                function_args = parse_partial_json(tool_call.function.arguments)
+                # Step 3: call the function
+                if function_name == "python_code_exec":
+                    out, captured, disp_images = function_to_call(*list(function_args.values()))
+                    print("Python Code executed:\n```python", function_args['code'], "```", sep="\n")
+                    if not out.success:
+                        # if not success, return the error message as function response. 
+                        print("Execution error:",  out.error_in_exec.__class__.__name__, out.error_in_exec)
+                        function_response = "Execution error: %s : %s" % (out.error_in_exec.__class__.__name__, out.error_in_exec)
+                    else:
+                        # if success return the output as function response.
+                        print("Execution Succeed:")
+                        captured.show()
+                        if captured.stdout:
+                            function_response = captured.stdout
+                        else:
+                            function_response = captured.outputs[0].data['text/plain']
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "name": function_name,
+                            "content": function_response,
+                        }
+                    )  # extend conversation with function response
+                    LOOP_END = False
+                elif function_name == "inspect_variable":
+                    insp_var = function_to_call(*list(function_args.values()))
+                    print("Variable inspected:", function_args['var_name'])
+                    print(insp_var)
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "name": function_name,
+                            "content": insp_var.__repr__(),
+                        }
+                    )
+                    LOOP_END = False
+                elif function_name == "seek_human_input":
+                    print(f"[Loop end, human input needed]\nAI request {list(function_args.values())}")
+                    LOOP_END = True
+            if LOOP_END:
+                break
+            # # Step 4: send the info for each function call and function response to the model
+            # second_response = client.chat.completions.create(
+            #     model=model_name,
+            #     messages=messages,
+            # )  
+            # # get a new response from the model where it can see the function response
+            # response_message_w_func = second_response.choices[0].message
+            # print(wrap_breakline(response_message_w_func.content, width=80))
+            # messages.append(response_message_w_func)
         else:
             print("[No tool use. Finishing conversation.]")
             break
