@@ -211,8 +211,24 @@ def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106',
                 {'role': 'user', 'content': question}
             ]
     else:
-        messages = chat_history
-        messages.append({'role': 'user', 'content': question})
+        if question is None:
+            messages = chat_history
+        else:
+            messages = chat_history
+            # decide if the final message is asking for human input, 
+            # then append the question as result to that. 
+            if chat_history[-1].tool_calls and \
+                (chat_history[-1].tool_calls[-1].function.name == "seek_human_input"):
+                print("[put the question as human input]")
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": chat_history[-1].tool_calls[-1].id,
+                    "name": "seek_human_input",
+                    "content": question
+                })
+            else:
+                messages.append({'role': 'user', 'content': question})
+                
     # this flag allows us to break out of the loop when human input is needed.
     LOOP_END = False 
     for iteration in range(MAX_ROUND):
