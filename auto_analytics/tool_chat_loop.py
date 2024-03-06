@@ -155,8 +155,10 @@ def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106',
                         captured.show()
                         if captured.stdout:
                             function_response = captured.stdout
-                        else:
+                        elif captured.outputs:
                             function_response = captured.outputs[0].data['text/plain']
+                        else:
+                            function_response = "Multimedia output e.g. image and code."
                     messages.append(
                         {
                             "role": "tool",
@@ -201,12 +203,16 @@ def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106',
 
 def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106', 
                    available_functions=available_functions, 
-                   codeexec_tools=codeexec_tools, MAX_ROUND=4):
+                   codeexec_tools=codeexec_tools, MAX_ROUND=4, chat_history=None):
     # Step 1: send the conversation and available functions to the model
-    messages = [
-            {'role': 'system', 'content': system_message}, 
-            {'role': 'user', 'content': question}
-        ]
+    if chat_history is None:
+        messages = [
+                {'role': 'system', 'content': system_message}, 
+                {'role': 'user', 'content': question}
+            ]
+    else:
+        messages = chat_history
+        messages.append({'role': 'user', 'content': question})
     # this flag allows us to break out of the loop when human input is needed.
     LOOP_END = False 
     for iteration in range(MAX_ROUND):
@@ -218,7 +224,7 @@ def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106',
         )
         response_message = response.choices[0].message
         # extract token count
-        token_count = response_message.token_count
+        # token_count = response_message.token_count
         messages.append(response_message)  # extend conversation with assistant's reply
         tool_calls = response_message.tool_calls
         if response_message.content:
@@ -247,8 +253,10 @@ def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106',
                         captured.show()
                         if captured.stdout:
                             function_response = captured.stdout
-                        else:
+                        elif captured.outputs:
                             function_response = captured.outputs[0].data['text/plain']
+                        else:
+                            function_response = "Multimedia output e.g. image and code."
                     messages.append(
                         {
                             "role": "tool",
