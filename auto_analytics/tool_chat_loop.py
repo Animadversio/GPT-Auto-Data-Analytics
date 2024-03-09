@@ -217,7 +217,8 @@ def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106',
             messages = chat_history
             # decide if the final message is asking for human input, 
             # then append the question as result to that. 
-            if chat_history[-1].tool_calls and \
+            if dict(messages[-1])["role"] == "assistant" and \
+                chat_history[-1].tool_calls and \
                 (chat_history[-1].tool_calls[-1].function.name == "seek_human_input"):
                 print("[put the question as human input]")
                 messages.append({
