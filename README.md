@@ -3,7 +3,7 @@ Automatize local data analysis with groups of tool-using GPT agents
 
 A data analysis project is usually motivated by a high level question and then break it down into 
 
-## TODO
+## Work-in-Progress
 * [x] Terminate the loop properly and avoid repeated run of loop. 
 * [x] **Dataset** Demo dataset of for data analysis from Kaggle. Mar. 3
 * [x] **ipynb report export** @Mar 10
@@ -13,6 +13,8 @@ A data analysis project is usually motivated by a high level question and then b
 * [ ] **Presentation** Nicer way to summarize results, code and figures into a nice looking report for human to read, instead of reading through the debugging history. 
 * [ ] **Folder structure** Design file structure for storing analysis results. 
     * [x] *reports* directory
+    * [ ] export figure directory? 
+    * [ ] code script and notebook?
 * [ ] Multi agent tool chat, one assigning tasks and objectives the other one execute it. 
 * [ ] Add memory slot, let it remember the objective by reading it back.  
 * [ ] Multi-file complex system analysis project. 

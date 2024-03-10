@@ -78,3 +78,64 @@ def save_cells_to_nb(cells, nbpath):
     with open(nbpath, 'w', encoding='utf-8') as f:
         nbformat.write(nb, f)
     return nb
+
+from nbconvert import HTMLExporter, PDFExporter
+import nbformat
+
+def convert_notebook_to_html(notebook_path, output_path=None):
+    """
+    Converts a Jupyter Notebook to an HTML file.
+
+    Parameters:
+    - notebook_path: Path to the input Jupyter Notebook (.ipynb).
+    - output_path: Path for the output HTML file.
+    """
+    # Load the notebook
+    if type(notebook_path) == str:
+        with open(notebook_path, 'r', encoding='utf-8') as f:
+            nb = nbformat.read(f, as_version=4)
+    elif type(notebook_path) == nbformat.notebooknode.NotebookNode:
+        nb = notebook_path
+    else:
+        raise ValueError("notebook_path must be a string or a NotebookNode")
+    
+    # Initialize the HTML Exporter and convert
+    html_exporter = HTMLExporter()
+    html_body, _ = html_exporter.from_notebook_node(nb)
+    if output_path is None and type(notebook_path) == str:
+        output_path = notebook_path.replace('.ipynb', '.html')
+    # Write the HTML output
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write(html_body)
+
+    print(f"HTML report saved to {output_path}")
+
+
+def convert_notebook_to_pdf(notebook_path, output_path=None):
+    """
+    Converts a Jupyter Notebook to a PDF file.
+
+    Parameters:
+    - notebook_path: Path to the input Jupyter Notebook (.ipynb).
+    - output_path: Path for the output PDF file.
+    """
+    # Load the notebook
+    if type(notebook_path) == str:
+        with open(notebook_path, 'r', encoding='utf-8') as f:
+            nb = nbformat.read(f, as_version=4)
+    elif type(notebook_path) == nbformat.notebooknode.NotebookNode:
+        nb = notebook_path
+    else:
+        raise ValueError("notebook_path must be a string or a NotebookNode")
+    # Initialize the PDF Exporter and convert
+    pdf_exporter = PDFExporter()
+    pdf_exporter.template_file = 'article'
+    pdf_body, _ = pdf_exporter.from_notebook_node(nb)
+    if output_path is None and type(notebook_path) == str:
+        output_path = notebook_path.replace('.ipynb', '.pdf')
+    # Write the PDF output
+    with open(output_path, 'wb') as f:
+        f.write(pdf_body)
+
+    print(f"PDF report saved to {output_path}")
+
