@@ -67,3 +67,14 @@ def create_code_cell_from_captured(code, out, captured):
         # Append each output cell to the code cell
         code_cell.outputs.append(output_cell)
     return code_cell
+
+
+def save_cells_to_nb(cells, nbpath):
+    # Create a new notebook
+    nb = new_notebook()
+    for cell in cells:
+        nb.cells.append(cell)
+    # Write the notebook to a file
+    with open(nbpath, 'w', encoding='utf-8') as f:
+        nbformat.write(nb, f)
+    return nb

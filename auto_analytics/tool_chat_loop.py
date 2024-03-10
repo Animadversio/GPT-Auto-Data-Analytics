@@ -316,3 +316,130 @@ def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106',
     return messages
 
 tool_chat_loop = tool_chat_loop_2
+from nbformat.v4 import new_notebook, new_code_cell, new_output, new_markdown_cell
+from auto_analytics.utils.nbformat_utils import create_code_cell_from_captured, save_cells_to_nb
+def tool_chat_loop_2nb(question, model_name='gpt-3.5-turbo-1106', 
+                   available_functions=available_functions, 
+                   codeexec_tools=codeexec_tools, MAX_ROUND=15, 
+                   chat_history=None, nbcells=None):
+    # Step 1: send the conversation and available functions to the model
+    cell_cache = []
+    if nbcells is None:
+        nbcells = []
+    else:
+        nbcells = nbcells
+    if chat_history is None:
+        messages = [
+                {'role': 'system', 'content': system_message}, 
+                {'role': 'user', 'content': question}
+            ]
+    else:
+        if question is None:
+            messages = chat_history
+        else:
+            messages = chat_history
+            # decide if the final message is asking for human input, 
+            # then append the question as result to that. 
+            if dict(messages[-1])["role"] == "assistant" and \
+                chat_history[-1].tool_calls and \
+                (chat_history[-1].tool_calls[-1].function.name == "seek_human_input"):
+                print("[put the question as human input]")
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": chat_history[-1].tool_calls[-1].id,
+                    "name": "seek_human_input",
+                    "content": question
+                })
+            else:
+                messages.append({'role': 'user', 'content': question})
+    # add the user input as markdown cell
+    nbcells.append(new_markdown_cell(source="**User**:\n"+question))
+    # this flag allows us to break out of the loop when human input is needed.
+    LOOP_END = False 
+    for iteration in range(MAX_ROUND):
+        response = client.chat.completions.create(
+            model = model_name, 
+            messages = messages,
+            tools = codeexec_tools,
+            tool_choice = 'auto',  # auto is default, but we'll be explicit
+        )
+        response_message = response.choices[0].message
+        # extract token count
+        # token_count = response_message.token_count
+        messages.append(response_message)  # extend conversation with assistant's reply
+        if response_message.content:
+            print(wrap_breakline(response_message.content, width=80))
+            nbcells.append(new_markdown_cell(source="**Assistant**:\n"+response_message.content))
+            
+        tool_calls = response_message.tool_calls
+        # Step 2: check if the model wanted to call a function
+        if tool_calls:
+            # iterate over all the function calls
+            for tool_call in tool_calls:
+                # Parse the function call
+                function_name = tool_call.function.name
+                function_to_call = available_functions[function_name]
+                # Note: the JSON response may not always be valid; be sure to handle errors
+                # function_args = json.loads(tool_call.function.arguments)
+                function_args = parse_partial_json(tool_call.function.arguments)
+                # Step 3: call the function
+                if function_name == "python_code_exec":
+                    out, captured, disp_images = function_to_call(*list(function_args.values()))
+                    print("Python Code executed:\n```python", function_args['code'], "```", sep="\n")
+                    if not out.success:
+                        # if not success, return the error message as function response. 
+                        print("Execution error:",  out.error_in_exec.__class__.__name__, out.error_in_exec)
+                        function_response = "Execution error: %s : %s" % (out.error_in_exec.__class__.__name__, out.error_in_exec)
+                    else:
+                        # if success return the output as function response.
+                        print("Execution Succeed:")
+                        captured.show()
+                        if captured.stdout:
+                            function_response = captured.stdout
+                        elif captured.outputs:
+                            function_response = captured.outputs[0].data['text/plain']
+                        else:
+                            function_response = "Multimedia output e.g. image and code."
+                    messages.append(
+                        {
+                            "role": "tool",
+                            "tool_call_id": tool_call.id,
+                            "name": function_name,
+                            "content": function_response,
+                        }
+                    )  # extend conversation with function response
+                    code_cell_out = create_code_cell_from_captured(function_args['code'], out, captured)
+                    cell_cache.append((function_args['code'], out, captured))
+                    nbcells.append(code_cell_out)
+                    LOOP_END = False
+                # elif function_name == "inspect_variable":
+                #     insp_var = function_to_call(*list(function_args.values()))
+                #     print("Variable inspected:", function_args['var_name'])
+                #     print(insp_var)
+                #     messages.append(
+                #         {
+                #             "role": "tool",
+                #             "tool_call_id": tool_call.id,
+                #             "name": function_name,
+                #             "content": insp_var.__repr__(),
+                #         }
+                #     )
+                #     LOOP_END = False
+                elif function_name == "seek_human_input":
+                    print(f"[Loop end, human input needed]\nAI request {list(function_args.values())}")
+                    LOOP_END = True
+            if LOOP_END:
+                break
+            # # Step 4: send the info for each function call and function response to the model
+            # second_response = client.chat.completions.create(
+            #     model=model_name,
+            #     messages=messages,
+            # )  
+            # # get a new response from the model where it can see the function response
+            # response_message_w_func = second_response.choices[0].message
+            # print(wrap_breakline(response_message_w_func.content, width=80))
+            # messages.append(response_message_w_func)
+        else:
+            print("[No tool use. Finishing conversation.]")
+            break
+    return messages, nbcells, cell_cache
