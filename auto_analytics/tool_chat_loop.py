@@ -109,7 +109,7 @@ available_functions = {
 MAX_ROUND = 4
 # model_name = 'gpt-3.5-turbo-1106' # "gpt-4-turbo-preview"
 # question = "We have already loaded a dataframe `df` in the kernel. Do not reload this. Each row denotes one model and its performance. find the best performing 10 models and summarize their similarities in time window"
-def tool_chat_loop(question, model_name='gpt-3.5-turbo-1106', 
+def tool_chat_loop_obsolete(question, model_name='gpt-3.5-turbo-1106', 
                    available_functions=available_functions, 
                    codeexec_tools=codeexec_tools, MAX_ROUND=4):
     # Step 1: send the conversation and available functions to the model
@@ -314,3 +314,5 @@ def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106',
             print("[No tool use. Finishing conversation.]")
             break
     return messages
+
+tool_chat_loop = tool_chat_loop_2
