@@ -129,7 +129,7 @@ def convert_notebook_to_pdf(notebook_path, output_path=None):
         raise ValueError("notebook_path must be a string or a NotebookNode")
     # Initialize the PDF Exporter and convert
     pdf_exporter = PDFExporter()
-    pdf_exporter.template_file = 'article'
+    # pdf_exporter.template_file = 'article'
     pdf_body, _ = pdf_exporter.from_notebook_node(nb)
     if output_path is None and type(notebook_path) == str:
         output_path = notebook_path.replace('.ipynb', '.pdf')
