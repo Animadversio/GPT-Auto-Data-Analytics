@@ -318,6 +318,7 @@ def tool_chat_loop_2(question, model_name='gpt-3.5-turbo-1106',
 tool_chat_loop = tool_chat_loop_2
 from nbformat.v4 import new_notebook, new_code_cell, new_output, new_markdown_cell
 from auto_analytics.utils.nbformat_utils import create_code_cell_from_captured, save_cells_to_nb
+from auto_analytics.utils.nbformat_utils import convert_notebook_to_html, convert_notebook_to_pdf
 def tool_chat_loop_2nb(question, model_name='gpt-3.5-turbo-1106', 
                    available_functions=available_functions, 
                    codeexec_tools=codeexec_tools, MAX_ROUND=15, 
@@ -443,3 +444,39 @@ def tool_chat_loop_2nb(question, model_name='gpt-3.5-turbo-1106',
             print("[No tool use. Finishing conversation.]")
             break
     return messages, nbcells, cell_cache
+
+
+class DataAnalysisAgent:
+    
+    def __init__(self, model_name='gpt-3.5-turbo-1106', 
+                 codeexec_tools=codeexec_tools,
+                 available_functions=available_functions):
+        self.model_name = model_name
+        self.messages = []
+        self.nbcells = []
+        self.cell_cache = []
+        self.codeexec_tools = codeexec_tools
+        self.available_functions = available_functions
+    
+    def chat(self, question, MAX_ROUND=15):
+        self.messages, self.nbcells, self.cell_cache = tool_chat_loop_2nb(
+            question, model_name=self.model_name, 
+            available_functions=available_functions, 
+            codeexec_tools=codeexec_tools, MAX_ROUND=MAX_ROUND, 
+            chat_history=self.messages, nbcells=self.nbcells)
+        return self.messages
+    
+    def save_nb(self, filename='notebook_with_plot_all.ipynb', save_pdf=False, save_html=False):
+        nb = save_cells_to_nb(self.nbcells, filename)
+        if save_pdf:
+            convert_notebook_to_pdf(nb, filename.replace('.ipynb', '.pdf'))
+        if save_html:
+            convert_notebook_to_html(nb, filename.replace('.ipynb', '.html'))
+        return filename
+    
+    def dump_messages(self, filename='messages.json'):
+        import json
+        with open(filename, 'w', encoding='utf-8') as f:
+            json.dump(self.messages, f, indent=4)
+        
+    

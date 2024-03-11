@@ -69,7 +69,7 @@ def create_code_cell_from_captured(code, out, captured):
     return code_cell
 
 
-def save_cells_to_nb(cells, nbpath):
+def save_cells_to_nb(cells, nbpath, save_pdf=False, save_html=False):
     # Create a new notebook
     nb = new_notebook()
     for cell in cells:
@@ -77,6 +77,11 @@ def save_cells_to_nb(cells, nbpath):
     # Write the notebook to a file
     with open(nbpath, 'w', encoding='utf-8') as f:
         nbformat.write(nb, f)
+    print(f"Notebook saved to {nbpath}")
+    if save_pdf:
+        convert_notebook_to_pdf(nb, nbpath.replace('.ipynb', '.pdf'))
+    if save_html:
+        convert_notebook_to_html(nb, nbpath.replace('.ipynb', '.html'))
     return nb
 
 from nbconvert import HTMLExporter, PDFExporter
