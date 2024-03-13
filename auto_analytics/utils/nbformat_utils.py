@@ -78,10 +78,18 @@ def save_cells_to_nb(cells, nbpath, save_pdf=False, save_html=False):
     with open(nbpath, 'w', encoding='utf-8') as f:
         nbformat.write(nb, f)
     print(f"Notebook saved to {nbpath}")
-    if save_pdf:
-        convert_notebook_to_pdf(nb, nbpath.replace('.ipynb', '.pdf'))
     if save_html:
-        convert_notebook_to_html(nb, nbpath.replace('.ipynb', '.html'))
+        try:
+            convert_notebook_to_html(nb, nbpath.replace('.ipynb', '.html'))
+        except Exception as e:
+            print("Failed to convert to html")
+            print(e)
+    if save_pdf:
+        try:
+            convert_notebook_to_pdf(nb, nbpath.replace('.ipynb', '.pdf'))
+        except Exception as e:
+            print("Failed to convert to pdf")
+            print(e)
     return nb
 
 from nbconvert import HTMLExporter, PDFExporter
