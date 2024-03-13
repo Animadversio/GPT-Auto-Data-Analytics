@@ -19,14 +19,16 @@ A data analysis project is usually motivated by a high level question and then b
 * [ ] **Multi agent** tool chat, one assigning tasks and objectives the other one execute it. 
     * Code architecture for these multi agent system.
     * Roles 
-        * [x] **Analysis designer**. Breaking down the overall objective into smaller questions that could be analyzed by code, assign them to data analyst. 
+        * [x] **Analysis Supervisor**. Breaking down the overall objective into smaller questions that could be analyzed by code, assign them to data analyst. 
         * [x] **Data analyst**. Taking the objective and tasks into account, using code to solve each one of them. 
-        * [x] **Visual analyst**. Draw conclusions from reading the figures and code. 
+        * [x] **Visual analyst**. Draw conclusions from reading the figures and code. @Mar.12th
+        * [ ] **Research Manager**. Maintain a list of TODO for the analyst, hand out task one by one, when one analysis is finished check the result and write summary, assign a new one. 
+            * [x] format the objective in a structred list, as json etc.  @Mar.12th
+            * [ ] then we can ask / answer them one by one? How to manage? 
         * [ ] **Summary writer**. Taking the output of data analyst and polish it into a report. 
-    * [ ] format the objective in a structred list, as json etc. then we can ask / answer them one by one.  
 * [ ] **Vision interface**, current agent cannot see the plot, so the analysis is not quite informative....
     * [x] Demo for vision api drawing conclusions from the figures. @Mar.11. 
-    * [ ] Integrating vision agent with the other agents. 
-    * [ ] Vision API is significantly slower than others... 
+    * [x] Integrating vision agent with the main chat loop and integrating visual insight @Mar.12th. 
+    * [ ] Vision API is significantly slower than others..... 
 * [ ] Add memory slot, let it remember the objective by reading it back.  
 * [ ] Multi-file complex system analysis project. 
