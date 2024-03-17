@@ -24,11 +24,12 @@ A data analysis project is usually motivated by a high level question and then b
         * [x] **Visual analyst**. Draw conclusions from reading the figures and code. @Mar.12th
         * [ ] **Research Manager**. Maintain a list of TODO for the analyst, hand out task one by one, when one analysis is finished check the result and write summary, assign a new one. 
             * [x] format the objective in a structred list, as json etc.  @Mar.12th
-            * [ ] then we can ask / answer them one by one? How to manage? 
+            * [ ] then we can ask / answer them one by one? How to manage better? 
         * [ ] **Summary writer**. Taking the output of data analyst and polish it into a report. 
 * [ ] **Vision interface**, current agent cannot see the plot, so the analysis is not quite informative....
     * [x] Demo for vision api drawing conclusions from the figures. @Mar.11. 
     * [x] Integrating vision agent with the main chat loop and integrating visual insight @Mar.12th. 
     * [ ] Vision API is significantly slower than others..... 
+* [ ] Overall CLI for default data analysis of a data set. Have a default workflow. Supervisor => Data analysis => 
 * [ ] Add memory slot, let it remember the objective by reading it back.  
 * [ ] Multi-file complex system analysis project. 
