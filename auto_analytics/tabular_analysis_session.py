@@ -47,8 +47,8 @@ class TabularAnalysisPipeline:
             f"the dataset description {self.table_descriptions}. "\
             f"and the column description {self.column_descriptions}.\n"\
             f"Our objective is to {self.task_objective}",
-            model_name=model_name, 
-            MAX_ROUND=MAX_ROUND, nbcells=self.nbcells)
+            model_name=model_name, MAX_ROUND=MAX_ROUND, 
+            nbcells=self.nbcells)
 
         content = self.messages[-1].content
         with open(join(self.result_dir, "analysis_questions.md"), "w") as file:
@@ -166,3 +166,4 @@ if __name__ == "__main__":
     analysis_session.perform_data_analysis(query=None, MAX_ROUND=2)
     # Save results to notebook, HTML, and PDF
     analysis_session.save_results()
+    

@@ -4,6 +4,8 @@ __pycache__/
 *$py.class
 .DS_Store
 */.DS_Store
+*.code-workspace
+scripts/*
 # C extensions
 *.so
 reports/*
