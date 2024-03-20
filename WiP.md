@@ -11,6 +11,7 @@
     * [x] Jupyter notebook report 
     * [x] PDF and HTML report 
     * [ ] Post processing and filtering of report. 
+    * [ ] **Bug fix**, if the loop in running in a terminal then the captured won't get the figure component! wont go to report!! 
 * [ ] **Folder structure** Design file structure for storing analysis results. 
     * [x] *reports* sub-directory
     * [x] notebook
