@@ -6,7 +6,7 @@ setup(
     author='Binxu Wang',
     author_email='binxu_wang@hms.harvard.edu',
     description='Automated local data analytics and report generation powered by GPT models.',
-    long_description=open('README.md').read(),
+    long_description="",
     long_description_content_type='text/markdown',
     url='https://github.com/Animadversio/GPT-Auto-Data-Analytics',
     packages=find_packages(),
