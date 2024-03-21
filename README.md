@@ -1,4 +1,4 @@
-# GPT-Auto-Data-Analytics | Automate local data analysis with groups of tool-using GPT agents. 
+# GPT-Auto-Data-Analytics : Automate local data analysis with groups of tool-using GPT agents. 
 
 ChatGPT and Code Interpreter has changed the way of data analysis. 
 But have you ever got frustrated about ...
