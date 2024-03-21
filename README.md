@@ -2,20 +2,23 @@
 
 ### Automate local data analysis with groups of tool-using GPT agents. 
 
-ChatGPT and Code Interpreter has changed the way of data analysis. 
+ChatGPT and Code Interpreter has changed the way of data analysis.
 But have you ever got frustrated about ...
-* Limited runtime and computing resources (no GPU access!)
-* Challenges in handling large and complex local datasets (which is hard to upload)
-* Certain Python packages being unavailable in online environment.
-* No vision ability to interpret the generated figures.
-* Lack of organized output from the analysis. 
+
+* 🤔 Limited runtime and computing resources (no GPU access!)
+* 📊 Challenges in handling large and complex local datasets (which is hard to upload)
+* 📦 Certain Python packages being unavailable in online environment.
+* 🚫 No vision ability to interpret the generated figures.
+* 🧩 Lack of organized output from the analysis.
+
 
 This project aims to replicate the online code interpreter experience locally, but also addressing all the issues mentioned above:
-* Code generation and execution in a local Python kernel
-* Full access to your data on local storage
-* A supervisor agent guides the coding agent to iteratively solve data analysis problems
-* Vision capabilities for the coding agent to interpret visual figures
-* Organized output, exported as Jupyter notebooks, PDF, and HTML
+
+* 💻 Code generation and execution in a local Python kernel
+* 📂 Full access to your data on local storage
+* 🤖 A supervisor agent guides the coding agent to iteratively solve data analysis problems
+* 👀 Vision capabilities for the coding agent to interpret visual figures
+* 📚 Organized output, exported as Jupyter notebooks, PDF, and HTML
 
 <!-- A data analysis project is usually motivated by a high level question and then break it down into  -->
 
